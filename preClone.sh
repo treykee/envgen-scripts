@@ -1,19 +1,20 @@
 #!/bin/bash
 # Init
-FILE="/tmp/out.$$"
-GREP="/bin/grep"
-#....
 # Make sure only root can run our script
-if [[ $EUID -ne 0 ]]; then
+if [[ $EUID -ne 0 ]];
+then
    echo "This script must be run as root" 1>&2
    exit 1
 else
+    # Set variables
+    logFiles=(/var/log/audit/audit.log /var/log/wtmp /var/log/lastlog /var/log/grubby /var/log/messages /var/log/secure)
+    
     # Check if required packages are installed.
     rpm -qa | grep -qw yum-utils || yum install -y yum-utils
 
     # Step 0: Stop logging processes.
     systemctl stop rsyslog
-    systemctl stop auditd
+    service auditd stop
 
     # Step 1: Remove old kernels.
     package-cleanup --oldkernels --count=1
@@ -28,18 +29,31 @@ else
     rm -rf /var/log/anaconda
 
     # Step 4: Truncate the audit logs (and other logs we want to keep placeholders for).
-    cat /dev/null > /var/log/audit/audit.log
-    cat /dev/null > /var/log/wtmp
-    cat /dev/null > /var/log/lastlog
-    cat /dev/null > /var/log/grubby
-    cat /dev/null > /var/log/messages
-    cat /dev/null > /var/log/secure
+    for f in "${logFiles[@]}";
+    do
+        if [ -f "$f" ];
+        then
+            cat /dev/null > "$f"
+        else
+            touch "$f"
+        fi
+    done
 
     # Step 5: Remove the udev persistent device rules.
-    rm -f /etc/udev/rules.d/70*
+    if [-f /etc/udev/rules.d/70*];
+    then
+        rm -f /etc/udev/rules.d/70*
+    else
+        echo "File does not exist" >&2
+    fi
 
     # Step 6: Remove the traces of the template MAC address and UUIDs.
-    sed -i '/^(HWADDR|UUID)=/d' /etc/sysconfig/network-scripts/ifcfg-eth0
+    if [ -f "/etc/sysconfig/network-scripts/ifcfg-eth0" ];
+    then
+        sed -i '/^(HWADDR|UUID)=/d' /etc/sysconfig/network-scripts/ifcfg-eth0
+    else
+        echo "File does not exist" >&2
+    fi
 
     # Step 7: Clean /tmp out.
     rm –rf /tmp/*
