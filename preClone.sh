@@ -7,7 +7,8 @@ then
    exit 1
 else
     # Set variables
-    logFiles=(/var/log/audit/audit.log /var/log/wtmp /var/log/lastlog /var/log/grubby /var/log/messages /var/log/secure)
+    logDir="/var/log"
+    logFiles=($logDir/audit/audit.log $logDir/wtmp $logDir/lastlog $logDir/grubby $logDir/messages $logDir/secure)
     
     # Check if required packages are installed.
     rpm -qa | grep -qw yum-utils || yum install -y yum-utils
@@ -24,9 +25,9 @@ else
 
     # Step 3: Force the logs to rotate & remove logs we don't need.
     logrotate –f /etc/logrotate.conf
-    rm –f /var/log/*-???????? /var/log/*.gz
-    rm -f /var/log/dmesg.old
-    rm -rf /var/log/anaconda
+    rm –f $logDir/*-???????? $logDir/*.gz
+    rm -f $logDir/dmesg.old
+    rm -rf $logDir/anaconda
 
     # Step 4: Truncate the audit logs (and other logs we want to keep placeholders for).
     for f in "${logFiles[@]}";
