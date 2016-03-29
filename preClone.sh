@@ -41,12 +41,14 @@ else
     done
 
     # Step 5: Remove the udev persistent device rules.
-    if [-f /etc/udev/rules.d/70*];
-    then
-        rm -f /etc/udev/rules.d/70*
-    else
-        echo "File does not exist" >&2
-    fi
+    for file in /etc/udev/rules.d/70*
+    do
+        if [ -f "$file" ]
+        then
+            rm -f /etc/udev/rules.d/70*
+        break
+        fi
+    done
 
     # Step 6: Remove the traces of the template MAC address and UUIDs.
     if [ -f "/etc/sysconfig/network-scripts/ifcfg-eth0" ];
