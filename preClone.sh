@@ -24,7 +24,7 @@ else
 
     # Step 3: Force the logs to rotate & remove logs we don't need.
     logrotate –f /etc/logrotate.conf
-    rm –f /var/log/*-???????? /var/log/*.gz
+    rm -f /var/log/*-???????? /var/log/*.gz
     rm -f /var/log/dmesg.old
     rm -rf /var/log/anaconda
 
@@ -40,7 +40,7 @@ else
     done
 
     # Step 5: Remove the udev persistent device rules.
-    if [-f /etc/udev/rules.d/70*];
+    if [[ -f /etc/udev/rules.d/70* ]];
     then
         rm -f /etc/udev/rules.d/70*
     else
