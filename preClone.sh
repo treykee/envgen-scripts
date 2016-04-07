@@ -32,7 +32,7 @@ else
     yum clean all
 
     # Step 3: Force the logs to rotate & remove logs we don't need.
-    logrotate –f /etc/logrotate.conf
+    logrotate -f /etc/logrotate.conf
     rm -f /var/log/*-???????? /var/log/*.gz &>/dev/null
     rm -f /var/log/dmesg.old &>/dev/null
     rm -rf /var/log/anaconda &>/dev/null
@@ -65,8 +65,8 @@ else
     fi
 
     # Step 7: Clean /tmp out.
-    rm –rf /tmp/* &>/dev/null
-    rm –rf /var/tmp/* &>/dev/null
+    rm -rf /tmp/* &>/dev/null
+    rm -rf /var/tmp/* &>/dev/null
 
     # Step 8: Remove the SSH host keys.
     rm -f /etc/ssh/*key* >&2
