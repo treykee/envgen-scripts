@@ -69,7 +69,7 @@ else
     rm –rf /var/tmp/* &>/dev/null
 
     # Step 8: Remove the SSH host keys.
-    rm –f /etc/ssh/*key* &>
+    rm -f /etc/ssh/*key* >&2
 
     # Step 9: Remove the root user's shell history.
     rm -f ~root/.bash_history
