@@ -8,8 +8,9 @@ then
 else
     # Set variables
     logServices=(rsyslog auditd)
+    logDir="/var/log"
     logFiles=(/var/log/audit/audit.log /var/log/wtmp /var/log/lastlog /var/log/grubby /var/log/messages /var/log/secure)
-        
+            
     # Check if required packages are installed.
     rpm -qa | grep -qw yum-utils || yum install -y yum-utils
 
@@ -33,9 +34,9 @@ else
 
     # Step 3: Force the logs to rotate & remove logs we don't need.
     logrotate -f /etc/logrotate.conf
-    rm -f /var/log/*-???????? /var/log/*.gz &>/dev/null
-    rm -f /var/log/dmesg.old &>/dev/null
-    rm -rf /var/log/anaconda &>/dev/null
+    find $logDir -name "*-????????" -type f -delete
+    find $logDir -name "dmesg.old" -type f -delete
+    find $logDir -name "anaconda" -type f -delete
 
     # Step 4: Truncate the audit logs (and other logs we want to keep placeholders for).
     for f in "${logFiles[@]}"
@@ -53,7 +54,7 @@ else
     then
         rm -f "/etc/udev/rules.d/70*"
     else
-        printf "File does not exist" >&2
+        printf "No udev persistent device rules exist\n" >&2
     fi
 
     # Step 6: Remove the traces of the template MAC address and UUIDs.
@@ -61,7 +62,7 @@ else
     then
         sed -i '/^(HWADDR|UUID)=/d' "/etc/sysconfig/network-scripts/ifcfg-eth0"
     else
-        printf "File does not exist" >&2
+        printf "No eth0 MAC address templates exist\n" >&2
     fi
 
     # Step 7: Clean /tmp out.
