@@ -10,6 +10,8 @@ else
     logServices=(rsyslog auditd)
     logDir="/var/log"
     logFiles=(/var/log/audit/audit.log /var/log/wtmp /var/log/lastlog /var/log/grubby /var/log/messages /var/log/secure)
+    ifcfgFiles=( $(find /etc/sysconfig/network-scripts/ -type f | grep -E 'ifcfg-.*?[^lo]') )
+
             
     # Check if required packages are installed.
     rpm -qa | grep -qw yum-utils || yum install -y yum-utils
@@ -58,11 +60,14 @@ else
     fi
 
     # Step 6: Remove the traces of the template MAC address and UUIDs.
-    if [ -f "/etc/sysconfig/network-scripts/ifcfg-eth0" ]
+    if [ ifcfgFiles ]
     then
-        sed -i '/^(HWADDR|UUID)=/d' "/etc/sysconfig/network-scripts/ifcfg-eth0"
+        for f in "${ifcfgFiles[@]}"
+        do
+            sed -i '/^(HWADDR|UUID)=/d' "$f"
+        done
     else
-        printf "No eth0 MAC address templates exist\n" >&2
+        printf "No virtual network adapter MAC address templates exist\n" >&2
     fi
 
     # Step 7: Clean /tmp out.
