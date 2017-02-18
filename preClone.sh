@@ -29,7 +29,7 @@ else
     done
 
     # Step 1: Remove old kernels.
-    package-cleanup --oldkernels --count=1
+    package-cleanup -y --oldkernels --count=1
 
     # Step 2: Clean out yum.
     yum clean all
