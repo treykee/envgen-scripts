@@ -79,6 +79,7 @@ else
 
     # Step 9: Remove the root user's shell history.
     rm -f ~root/.bash_history
+    history -c
     unset HISTFILE
 
     # Step 10: Remove the root user’s SSH history & kickstart configuration file.
