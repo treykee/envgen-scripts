@@ -12,8 +12,6 @@ else
     logServices=(rsyslog auditd)
     logDir="/var/log"
     logFiles=(/var/log/audit/audit.log /var/log/wtmp /var/log/lastlog /var/log/grubby /var/log/messages /var/log/secure)
-    ifcfgFiles=( $(find /etc/sysconfig/network-scripts/ -type f | grep -E 'ifcfg-.*?[^lo]') )
-
             
     # Update sources and install necessary packages
     yum update -y && yum install -y epel-release yum-utils
@@ -36,13 +34,25 @@ else
     # Step 2: Clean out yum.
     yum clean all
 
-    # Step 3: Force the logs to rotate & remove logs we don't need.
+    # Step 3: Set SELinux to Permissive mode.
+    printf "Checking SELinux status...\n"
+    if [ $(getenforce) = "Enforcing" ]
+    then
+        setenforce "0" && printf "SELinux is now $(getenforce).\n"
+    elif [ $(getenforce) = "Permissive" ]
+    then
+        printf "SELinux is already $(getenforce).\n"
+    else
+        printf "Could not determine SELinux status.\n"
+    fi
+
+    # Step 4: Force the logs to rotate & remove logs we don't need.
     logrotate -f /etc/logrotate.conf
     find $logDir -name "*-????????" -type f -delete
     find $logDir -name "dmesg.old" -type f -delete
     find $logDir -name "anaconda" -type f -delete
 
-    # Step 4: Truncate the audit logs (and other logs we want to keep placeholders for).
+    # Step 5: Truncate the audit logs (and other logs we want to keep placeholders for).
     for f in "${logFiles[@]}"
     do
         if [ -f "$f" ]
