@@ -64,5 +64,6 @@ else
     done
 
     # Done (for now!)
-    printf "Boostrap process complete!"
-    #printf "Restarting now..." && shutdown -r now
+    printf "Boostrap process complete!\n"
+    printf "Restarting now...\n" && shutdown -r now
+fi
